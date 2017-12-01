@@ -1,14 +1,9 @@
 defmodule Exiota.Trinary do
   @moduledoc """
-
+  Helpers for working with trits and trytes
   """
 
-  defstruct [trits: nil]
-
   @tryte_to_trits_mappings Application.get_env(:exiota, :tryte_to_tetris_mappings)
-
-  def get_trits(trits = [_, _, _, _, _, _, _, _]), do:
-    %__MODULE__{trits: trits}
 
   @doc """
   Checks if a trit is valid or not.
@@ -52,15 +47,28 @@ defmodule Exiota.Trinary do
     int_to_trits(<<num::little-signed-64>>, num < 0)
 
   def int_to_trits(trits = <<_::binary-8>>, false), do:
-    {:ok, %__MODULE__{trits: trits}}
+    {:ok, trits}
 
   def int_to_trits(<<t1, t2, t3, t4, t5, t6, t7, t8>>, true), do:
-    {:ok, %__MODULE__{trits: <<-t1, -t2, -t3, -t4, -t5, -t6, -t7, -t8>>}}
+    {:ok, <<-t1, -t2, -t3, -t4, -t5, -t6, -t7, -t8>>}
+
+  def int_to_trits(_, _), do:
+    {:error, :invalid_input}
 
   @doc """
   Converts trits to int
   """
-  def trits_to_int(%__MODULE__{trits: <<trits::little-signed-64>>}), do:
+  def trits_to_int(<<trits::little-signed-64>>), do:
     {:ok, trits}
+  def trits_to_int(_), do:
+    {:error, :invalid_trits}
+
+  @doc """
+  Determines if a trits binary can be converted to Trytes.
+  The condition is the mod of trits length to 3 is zero.
+  (trits length are dividalbe by 3)
+  """
+  def can_tryte?(trits) when is_binary(trits), do:
+    rem(byte_size(trits), 3) == 0
 
 end
