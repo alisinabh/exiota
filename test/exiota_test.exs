@@ -1,7 +1,7 @@
 defmodule ExiotaTest do
   use ExUnit.Case
   doctest Exiota
-  doctest Exiota.Trinary
+  doctest Exiota.Utils.AsciiTrytes
 
   test "greets the world" do
     assert Exiota.hello() == :world
