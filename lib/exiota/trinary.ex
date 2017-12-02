@@ -35,19 +35,37 @@ defmodule Exiota.Trinary do
       iex> Exiota.Trinary.valid?([1, 1.001, -1])
       false
   """
-  def valid?([trit | t]) when trit <= 1 and trit >= -1, do: valid?(t)
-  def valid?([]), do: true
-  def valid?([_ | _t]), do: false
+  def valid?([]), do: false
+  def valid?(trits) when is_list(trits), do: do_valid?(trits)
+  def valid?(_), do: false
 
+  defp do_valid?([trit | t]) when trit <= 1 and trit >= -1, do: do_valid?(t)
+  defp do_valid?([]), do: true
+  defp do_valid?(_), do: false
+
+  @doc """
+  Determines if two trits are equal
+
+  ## Examples
+      iex> Exiota.Trinary.equal?([1, 2, 3], [1, 2, 3])
+      true
+
+      iex> Exiota.Trinary.equal?([1, 3, 2], [1, 2, 3])
+      false
+  """
+  def equal?(trit_a, trit_b) when is_list(trit_a) and is_list(trit_b), do:
+    trit_a == trit_b
+  def equal?(_, _), do: false
 
   @doc """
   Converts a signed little endian int64 to trits
   """
+  # TODO: add size and make dynamic
   def int_to_trits(num) when is_integer(num), do:
     int_to_trits(<<num::little-signed-64>>, num < 0)
 
-  def int_to_trits(trits = <<_::binary-8>>, false), do:
-    {:ok, trits}
+  def int_to_trits(<<t1, t2, t3, t4, t5, t6, t7, t8>>, false), do:
+    {:ok, <<t1, t2, t3, t4, t5, t6, t7, t8>>}
 
   def int_to_trits(<<t1, t2, t3, t4, t5, t6, t7, t8>>, true), do:
     {:ok, <<-t1, -t2, -t3, -t4, -t5, -t6, -t7, -t8>>}
@@ -58,6 +76,7 @@ defmodule Exiota.Trinary do
   @doc """
   Converts trits to int
   """
+  # TODO: Use list
   def trits_to_int(<<trits::little-signed-64>>), do:
     {:ok, trits}
   def trits_to_int(_), do:
@@ -68,7 +87,7 @@ defmodule Exiota.Trinary do
   The condition is the mod of trits length to 3 is zero.
   (trits length are dividalbe by 3)
   """
+  # TODO: Use list
   def can_tryte?(trits) when is_binary(trits), do:
     rem(byte_size(trits), 3) == 0
-
 end
