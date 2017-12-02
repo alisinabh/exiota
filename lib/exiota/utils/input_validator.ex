@@ -62,4 +62,46 @@ defmodule Exiota.Utils.InputValidator do
   def num?(input), do: Regex.match?(~r/^(\d+\.?\d{0,15}|\.\d{0,15})/, input)
 
   def hash?(input), do: trytes?(input, 81)
+
+  def transfer_array?(input) when is_list(input), do: do_transfer_array?(input)
+  def transfer_array?(_), do: false
+
+  defp do_transfer_array?([transfer = %{} | tail]) do
+    tag =
+      case transfer[:tag] do
+        nil ->
+          transfer[:obsolete_tag]
+        trans_tag ->
+          trans_tag
+      end
+
+    cond do
+      address?(transfer[:address])
+      and value?(transfer[:value])
+      and trytes?(transfer[:message])
+      and trytes?(tag) ->
+        do_transfer_array
+      true ->
+        false
+    end   
+  end
+  defp do_transfer_array?([]), do: true
+  defp do_transfer_array?(_), do: false
+
+  def hash_array?(input) when is_list(input), do: do_hash_array?(input)
+  def hash_array?(_), do: false
+
+  defp do_hash_array?([hash | tail]) when is_binary(hash) do
+    hash_len = String.length hash
+    cond do
+      hash_len == 90 and trytes?(hash, 90) ->
+        do_hash_array?(tail)
+      trytes?(hash, 81) ->
+        do_hash_array?(tail)
+      true ->
+        false
+    end
+  end
+  defp do_hash_array?([]), do: true
+  defp do_hash_array?(_), do: false
 end
